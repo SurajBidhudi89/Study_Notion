@@ -1,4 +1,4 @@
-const Tag = require("../models/Tags");
+const Tag = require("../models/Category");
 
 // create tag ka handler functions
 
@@ -48,6 +48,48 @@ exports.showAlltags = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "error.message",
+    });
+  }
+};
+
+exports.categoryPageDetails = async (req, res) => {
+  try {
+    //get categoryId
+    const { categoryId } = req.body;
+
+    // get courses for specified category id
+    const selectedCategory = await Category.findById(categoryId)
+      .populate("courses")
+      .exec();
+
+    // validation
+    if (!selectedCategory) {
+      return res.status(404).json({
+        success: false,
+        message: "Data Not found",
+      });
+    }
+    // get course for different categories
+    const differentCategories = await Category.find({
+      _id: { $ne: categoryId },
+    })
+      .populate("courses")
+      .exec();
+    // get top  sellling courses
+    //retrun response
+    return res.status(200).json({
+      success: true,
+      message: "According to categories daata is shown",
+      data: {
+        selectedCategory,
+        differentCategories,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: error.message,
     });
   }
 };

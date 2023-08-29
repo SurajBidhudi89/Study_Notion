@@ -3,6 +3,10 @@ const OTP = require("../models/OTP");
 const otpGenerator = require("otp-generator");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { passwordUpdated } = require("../mail/templates/passwordUpdate");
+const Profile = require("../models/Profile");
+const mailSender = require("../utils/mailSender");
+
 require("dotenv").config();
 
 exports.sendOTP = async (req, res) => {
@@ -106,7 +110,7 @@ exports.signUp = async (req, res) => {
       });
     }
 
-    //check user already exist or not
+    //check if user already exist or not
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({
@@ -166,7 +170,6 @@ exports.signUp = async (req, res) => {
     });
   }
 };
-
 
 // LOGIN
 
@@ -239,7 +242,6 @@ exports.changePassword = async (req, res) => {
       mesasge: "All fields are requried",
     });
   }
-  
 
   // update pwd in db
   // send mail, password updated,

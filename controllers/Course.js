@@ -1,5 +1,5 @@
 const Course = require("../models/Course");
-const Tag = require("../models/Tags");
+const Tag = require("../models/Category");
 const User = require("../models/User");
 const { uploadImageToCloudinary } = require("../utils/imageUploader");
 
@@ -112,7 +112,7 @@ exports.createCourse = async (req, res) => {
 
 // getAll courses from DB;
 
-exports.showAllCourses = async (req, res) => {
+exports.getAllCourses = async (req, res) => {
   try {
     const allCourses = await Course.find(
       {},
@@ -139,6 +139,51 @@ exports.showAllCourses = async (req, res) => {
       success: false,
       message: "Cannot Fetch course data",
       error: error.message,
+    });
+  }
+};
+
+// getCourse Details
+
+exports.getCourseDetails = async (req, res) => {
+  try {
+    // get id
+    const { courseId } = req.body;
+    // find course Details
+    const courseDetails = await Course.find({ _id: courseId })
+      .populate({
+        path: "instructor",
+        populate: {
+          path: "additionDetails",
+        },
+      })
+      .populate("category")
+      .populate("ratingAndreviews")
+      .populate({
+        path: "courseContent",
+        populate: {
+          path: "subSection",
+        },
+      })
+      .exec();
+    // validation
+    if (!courseDetails) {
+      return res.status(200).json({
+        success: true,
+        message: `course not find the course with ${courseId}`,
+      });
+    }
+    //return response
+    return res.status(200).json({
+      success: true,
+      message: "course Details fetched successfully",
+      data: courseDetails,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "error.message",
     });
   }
 };
